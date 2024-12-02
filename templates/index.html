@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dog Breed Classifier</title>
+</head>
+<body>
+    <h1>Dog Breed Classifier</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <label for="file">Upload an image of a dog:</label>
+        <input type="file" id="file" name="file" accept="image/*" required>
+        <button type="submit">Predict</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('file');
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.json();
+            const resultDiv = document.getElementById('result');
+
+            if (response.ok) {
+                // Start with breed and confidence
+                let html = `
+                    <h2>Prediction Result</h2>
+                    <p><strong>Breed:</strong> ${result.breed}</p>
+                    <p><strong>Confidence:</strong> ${(result.confidence * 100).toFixed(2)}%</p>
+                `;
+
+                // Add breed details if available
+                if (result.breed_details) {
+                    html += `
+                        <h3>About ${result.breed}</h3>
+                        <table border="1" cellspacing="0" cellpadding="5">
+                            ${Object.entries(result.breed_details).map(([key, value]) => `
+                                <tr>
+                                    <td><strong>${key.replace(/_/g, ' ').toUpperCase()}:</strong></td>
+                                    <td>${value}</td>
+                                </tr>
+                            `).join('')}
+                        </table>
+                    `;
+                } else {
+                    html += '<p>No additional information found for this breed.</p>';
+                }
+
+                resultDiv.innerHTML = html;
+            } else {
+                resultDiv.innerHTML = `<p>Error: ${result.error}</p>`;
+            }
+        });
+            // if (response.ok) {
+            //     resultDiv.innerHTML = `
+            //         <h2>Prediction Result</h2>
+            //         <p><strong>Breed:</strong> ${result.breed}</p>
+            //         <p><strong>Confidence:</strong> ${(result.confidence * 100).toFixed(2)}%</p>
+            //         ${result.breed_details ? `
+            //             <h3>About ${result.breed}</h3>
+            //             <p>${JSON.stringify(result.breed_details)}</p>
+            //         ` : '<p>No additional information found.</p>'}
+            //     `;
+            // } else {
+            //     resultDiv.innerHTML = `<p>Error: ${result.error}</p>`;
+            // }
+        
+    </script>
+</body>
+</html>
