@@ -17,7 +17,7 @@ model = load_model('model/dog_breed_model.h5')
 breed_info = pd.read_csv('dogs-ranking-dataset.csv')
 
 # Automatically generate class indices by parsing folder names
-image_folder = 'dataset/Images'
+image_folder = 'dataset/dataset/Images'
 class_indices = {
     folder.split('-')[-1]: idx
     for idx, folder in enumerate(sorted(os.listdir(image_folder)))
