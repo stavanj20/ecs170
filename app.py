@@ -66,3 +66,6 @@ def predict():
         breed_details=breed_details
     )
 
+if __name__ == '__main__':
+    app.run(debug=True)
+
