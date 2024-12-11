@@ -69,7 +69,7 @@
 # if __name__ == '__main__':
 #     app.run(debug=True)
 
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session
 import os
 import numpy as np
 from tensorflow.keras.models import load_model
@@ -146,6 +146,8 @@ def predict():
     else:
         breed_details = {"Breed": breed_name, "Info": "No additional details available."}
 
+    # session['breed_details'] = breed_details
+
     return jsonify({
         'image_url': image_url,
         'breed': breed_name,
@@ -164,6 +166,7 @@ def results():
 
     # Ensure breed_details is passed to the template
     breed_details = request.args.get('breed_details', '{}')  # Default to an empty JSON string
+    # breed_details = session.pop('breed_details', {})
     if breed_details:
         try:
             breed_details = json.loads(breed_details)  # Convert JSON string back to Python dictionary
