@@ -2,5 +2,4 @@ dataset
 .ipynb_checkpoints
 dogs
 __pycache__
-model
 .vercel
