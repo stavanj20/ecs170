@@ -93,28 +93,33 @@
             .catch(err => console.error('Error uploading to Cloudinary:', err));
         }
 
-        function sendToFlask() {
-            fetch('/predict', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'  // 🔥 Ensure Content-Type is set to application/json
-                },
-                body: JSON.stringify({ image_url: uploadedFileUrl })  // 🔥 Convert to JSON string
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Prediction response from Flask:', data);
+        async function sendToFlask() {
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }, // 🔥 Ensure Content-Type is set to application/json
+                    body: JSON.stringify({ image_url: uploadedFileUrl }), // 🔥 Convert to JSON string
+                })
 
-                const imageUrl = encodeURIComponent(data.image_url);
-                const breed = encodeURIComponent(data.breed);
-                const confidence = encodeURIComponent(data.confidence);
-                const breedDetails = encodeURIComponent(JSON.stringify(data.breed_details));  // Convert breed_details to JSON and encode it
+                if (!response.ok) throw new Error(`Server returned status: ${response.status}`) // If the status is not OK, throw an error
 
-                window.location.href = `/results?image_url=${imageUrl}&breed=${breed}&confidence=${confidence}&breed_details=${breedDetails}`;
-                // window.location.href = `/results?image_url=${encodeURIComponent(data.image_url)}&breed=${encodeURIComponent(data.breed)}&confidence=${encodeURIComponent(data.confidence)}`;
-            })
-            .catch(err => console.error('Error sending image URL to Flask:', err));
+                const data = await response.json() // Wait for the JSON response
+                console.log('Prediction response from Flask:', data)
+
+                // Encode URL components to ensure valid URL
+                const imageUrl = encodeURIComponent(data.image_url)
+                const breed = encodeURIComponent(data.breed)
+                const confidence = encodeURIComponent(data.confidence)
+                const breedDetails = encodeURIComponent(JSON.stringify(data.breed_details)) // Convert breed_details to JSON and encode it
+
+                // Redirect to the /results page with the prediction details as query params
+                window.location.href = `/results?image_url=${imageUrl}&breed=${breed}&confidence=${confidence}&breed_details=${breedDetails}`
+            } catch (error) {
+                console.error('Error sending image URL to Flask:', error)
+                alert('Sorry, there was an error processing your request. Please try again later.')
+            }
         }
+
 
 
         // function sendToFlask() {

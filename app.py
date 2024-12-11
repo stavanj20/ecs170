@@ -122,9 +122,11 @@ def predict():
 
     # 🔥 Download the image from Cloudinary
     try:
-        response = requests.get(image_url)
-        response.raise_for_status()
-        image_bytes = BytesIO(response.content)  # Convert image to byte stream for processing
+        response = requests.get(image_url, stream=True)
+        response.raise_for_status()  # Check for HTTP errors
+        image_bytes = BytesIO()
+        for chunk in response.iter_content(chunk_size=8192):
+            image_bytes.write(chunk)
     except Exception as e:
         return jsonify({'error': f'Error fetching image from URL: {str(e)}'}), 400
 
