@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -32,6 +32,106 @@
         function showPredictButton() {
             document.getElementById('predict-btn').style.display = 'inline-block';
         }
+    </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dog Breed ID</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="intro">
+        <div class="overlay">
+            <div class="content-container">
+                <h1>Welcome to Dog Breed ID</h1>
+                <p>
+                    Looking to uncover your furry friend's breed? <br>
+                    Upload a photo, and let us do the rest!
+                </p>
+
+                <form id="upload-form" method="POST" enctype="multipart/form-data">
+                    <input id="file-input" type="file" name="file" style="display:none;" onchange="uploadToCloudinary(this)">
+
+                    <div class="button-group">
+                        <button class="upload-btn" type="button" onclick="document.getElementById('file-input').click();">Upload a Photo</button>
+                        <button id="predict-btn" class="predict-btn" type="button" style="display:none;" onclick="sendToFlask()">Predict</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let uploadedFileUrl = ''; // Store the URL of the uploaded file
+
+        // Cloudinary Configuration
+        const cloudName = 'dycjsp8iy';  // Replace with your Cloudinary Cloud Name
+        const uploadPreset = 'Dog Breed Classifier';  // Replace with your Cloudinary Upload Preset
+
+        function uploadToCloudinary(input) {
+            const file = input.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', uploadPreset);
+
+            fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                uploadedFileUrl = data.secure_url; // URL of the uploaded image
+                console.log('File uploaded to Cloudinary:', uploadedFileUrl);
+                document.getElementById('predict-btn').style.display = 'inline-block'; // Show the Predict button
+            })
+            .catch(err => console.error('Error uploading to Cloudinary:', err));
+        }
+
+        function sendToFlask() {
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'  // 🔥 Ensure Content-Type is set to application/json
+                },
+                body: JSON.stringify({ image_url: uploadedFileUrl })  // 🔥 Convert to JSON string
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Prediction response from Flask:', data);
+
+                const imageUrl = encodeURIComponent(data.image_url);
+                const breed = encodeURIComponent(data.breed);
+                const confidence = encodeURIComponent(data.confidence);
+                const breedDetails = encodeURIComponent(JSON.stringify(data.breed_details));  // Convert breed_details to JSON and encode it
+
+                window.location.href = `/results?image_url=${imageUrl}&breed=${breed}&confidence=${confidence}&breed_details=${breedDetails}`;
+                // window.location.href = `/results?image_url=${encodeURIComponent(data.image_url)}&breed=${encodeURIComponent(data.breed)}&confidence=${encodeURIComponent(data.confidence)}`;
+            })
+            .catch(err => console.error('Error sending image URL to Flask:', err));
+        }
+
+
+        // function sendToFlask() {
+        //     fetch('/predict', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify({ image_url: uploadedFileUrl })
+        //     })
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         console.log('Prediction response from Flask:', data);
+        //         window.location.href = `/results?image_url=${encodeURIComponent(data.image_url)}&breed=${encodeURIComponent(data.breed)}&confidence=${encodeURIComponent(data.confidence)}`;
+        //     })
+        //     .catch(err => console.error('Error sending image URL to Flask:', err));
+        // }
     </script>
 </body>
 </html>

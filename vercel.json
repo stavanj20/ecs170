@@ -4,9 +4,10 @@
       { "src": "app.py", "use": "@vercel/python" }
     ],
     "routes": [
-        { "src": "/(.*)", "dest": "app.py",
-        "bodyParser": { "sizeLimit": "200mb" }
-        }
+      { 
+        "src": "/(.*)", 
+        "dest": "app.py" 
+      }
     ]
   }
   
