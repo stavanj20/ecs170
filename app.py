@@ -68,9 +68,9 @@
 
 # if __name__ == '__main__':
 #     app.run(debug=True)
-
-from flask import Flask, request, jsonify, render_template, session
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+from flask import Flask, request, jsonify, render_template, session
 import numpy as np
 from tensorflow.keras.models import load_model
 import pandas as pd
